@@ -6,10 +6,10 @@ import json
 
 # ------------------ FIREBASE ADMIN INIT ------------------
 if not firebase_admin._apps:
-    # Load JSON from Streamlit secrets
-    cred_dict = st.secrets["firebase_json"]
+    # Copy the secret into a new dict (do not modify st.secrets directly)
+    cred_dict = dict(st.secrets["firebase_json"])
 
-    # Fix the private key newlines (very important!)
+    # Fix the private key newlines
     cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
 
     # Initialize Firebase
@@ -35,14 +35,12 @@ def create_user(email: str, password: str) -> bool:
         return False
 
 
-def authenticate_user(email: str, password: str) -> bool:
+def authenticate_user(email: str) -> bool:
     """
     Authenticate a user via Firebase Admin SDK (verify if exists).
-    Firebase Admin SDK cannot sign in, but we can check if user exists.
     """
     try:
         user = auth.get_user_by_email(email)
-        # For real password verification, you would need Firebase client SDK (not Admin)
         return True if user else False
     except firebase_admin.exceptions.FirebaseError:
         return False
