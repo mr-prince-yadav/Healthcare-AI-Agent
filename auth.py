@@ -2,7 +2,7 @@ import requests
 import streamlit as st
 
 # Firebase Web API key from Streamlit Secrets
-FIREBASE_API_KEY = st.secrets["firebase"]["firebase_api_key"]
+FIREBASE_API_KEY = st.secrets["firebase"]["FIREBASE_API_KEY"]
 
 BASE_URL = "https://identitytoolkit.googleapis.com/v1"
 
@@ -36,3 +36,4 @@ def authenticate_user(username: str, password: str) -> bool:
 
     r = requests.post(url, json=payload)
     return r.status_code == 200
+
