@@ -7,9 +7,9 @@ import sqlite3
 
 # ------------------- Firebase Admin Init -------------------
 if not firebase_admin._apps:
-    cred_json = st.secrets["firebase_json"]  # JSON string from secrets
-    cred_dict = json.loads(cred_json)
+    cred_dict = st.secrets["firebase_json"]  # already a dict
     cred = credentials.Certificate(cred_dict)
+
     firebase_admin.initialize_app(cred)
 
 # ------------------- SQLite fallback -------------------
@@ -56,3 +56,4 @@ def authenticate_user(username: str, password: str) -> bool:
     if row and row[0] == password:
         return True
     return False
+
