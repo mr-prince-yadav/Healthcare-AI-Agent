@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import time
 from relay_email import send_email
 
-DB_FILE = "users.db"
+DB_FILE = st.secrets["database"]["db_name"]
 
 # -------------------- Database helpers --------------------
 def get_conn():
@@ -145,3 +145,4 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"[ERROR] Exception in reminder loop: {e}")
         time.sleep(15)  # check every 15 seconds
+
