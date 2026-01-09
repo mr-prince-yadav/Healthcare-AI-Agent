@@ -1,12 +1,12 @@
 import sqlite3
 import hashlib
+import streamlit as st  # import to access secrets
 
-DB_NAME = "users.db"
-
+# Use Streamlit secrets for DB name
+DB_NAME = st.secrets["database"]["db_name"]
 
 def get_connection():
     return sqlite3.connect(DB_NAME, check_same_thread=False)
-
 
 def create_users_table():
     conn = get_connection()
@@ -20,10 +20,8 @@ def create_users_table():
     conn.commit()
     conn.close()
 
-
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
-
 
 def create_user(username: str, password: str) -> bool:
     try:
@@ -38,7 +36,6 @@ def create_user(username: str, password: str) -> bool:
         return True
     except sqlite3.IntegrityError:
         return False
-
 
 def authenticate_user(username: str, password: str) -> bool:
     conn = get_connection()
