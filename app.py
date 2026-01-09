@@ -21,7 +21,7 @@ from io import BytesIO
 
 load_dotenv()
 # ---------------------- DATABASE HELPERS ----------------------
-DB_FILE = st.secrets["database"]["db_name"]
+DB_FILE = "db_name"
 
 def get_conn():
     return sqlite3.connect(DB_FILE, check_same_thread=False)
@@ -506,4 +506,5 @@ def main():
 
 if __name__=="__main__":
     main()
+
 
