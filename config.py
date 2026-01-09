@@ -1,12 +1,5 @@
-import os
-from dotenv import load_dotenv
+# config.py
+import streamlit as st
 
-load_dotenv(override=True)
-
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if not GOOGLE_API_KEY:
-    raise RuntimeError("GOOGLE_API_KEY not found")
-
-RELAY_WEBHOOK_URL = os.getenv("RELAY_WEBHOOK_URL")
-if not RELAY_WEBHOOK_URL:
-    raise RuntimeError("RELAY_WEBHOOK_URL not found")
+GOOGLE_API_KEY = st.secrets["api"]["google_api_key"]
+RELAY_WEBHOOK_URL = st.secrets["api"]["relay_webhook_url"]
