@@ -65,6 +65,11 @@ def render_profile_view():
     st.divider()
     st.info("Edit profile from Settings tab")
 
+    # ✅ LOGOUT BUTTON (PASTE HERE)
+    st.divider()
+    if st.button("🚪 Logout", type="primary"):
+        st.session_state.clear()
+        st.rerun()
 
 # ------------------- PROFILE EDIT / SETTINGS -------------------
 def render_profile_edit():
@@ -117,3 +122,4 @@ def render_profile_edit():
     p["disease"] = st.text_area("Diseases", p.get("disease",""))
     p["medications"] = st.text_area("Medications", p.get("medications",""))
     p["handicapped"] = st.radio("Physically Handicapped?", ["No","Yes"])
+
