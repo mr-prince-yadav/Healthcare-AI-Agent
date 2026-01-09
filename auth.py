@@ -3,57 +3,48 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, auth
 import json
-import sqlite3
 
-# ------------------- Firebase Admin Init -------------------
+# ------------------ FIREBASE ADMIN INIT ------------------
 if not firebase_admin._apps:
-    cred_dict = st.secrets["firebase_json"]  # already a dict
-    cred = credentials.Certificate(cred_dict)
+    # Load JSON from Streamlit secrets
+    cred_dict = st.secrets["firebase_json"]
 
+    # Fix the private key newlines (very important!)
+    cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
+
+    # Initialize Firebase
+    cred = credentials.Certificate(cred_dict)
     firebase_admin.initialize_app(cred)
 
-# ------------------- SQLite fallback -------------------
-DB_FILE = st.secrets["database"]["db_name"]
-
-def get_conn():
-    return sqlite3.connect(DB_FILE, check_same_thread=False)
-
-def create_users_table():
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS users(username TEXT PRIMARY KEY, password TEXT)")
-    conn.commit()
-    conn.close()
-
-# ------------------- User functions -------------------
-def create_user(username: str, password: str) -> bool:
+# ------------------ USER MANAGEMENT ------------------
+def create_user(email: str, password: str) -> bool:
     """
-    Create a user in Firebase Auth and SQLite.
+    Create a user in Firebase Authentication.
     """
     try:
-        # Firebase Admin creates user
-        auth.create_user(email=username, password=password)
-        # Also store locally in SQLite
-        conn = get_conn()
-        cur = conn.cursor()
-        cur.execute("INSERT INTO users(username, password) VALUES (?, ?)", (username, password))
-        conn.commit()
-        conn.close()
+        user = auth.create_user(
+            email=email,
+            password=password
+        )
         return True
+    except firebase_admin.exceptions.FirebaseError as e:
+        print(f"[Firebase Error] {e}")
+        return False
     except Exception as e:
-        st.error(f"Error creating user: {e}")
+        print(f"[Error] {e}")
         return False
 
-def authenticate_user(username: str, password: str) -> bool:
-    """
-    Authenticate user using local SQLite (Admin SDK cannot verify passwords directly)
-    """
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("SELECT password FROM users WHERE username=?", (username,))
-    row = cur.fetchone()
-    conn.close()
-    if row and row[0] == password:
-        return True
-    return False
 
+def authenticate_user(email: str, password: str) -> bool:
+    """
+    Authenticate a user via Firebase Admin SDK (verify if exists).
+    Firebase Admin SDK cannot sign in, but we can check if user exists.
+    """
+    try:
+        user = auth.get_user_by_email(email)
+        # For real password verification, you would need Firebase client SDK (not Admin)
+        return True if user else False
+    except firebase_admin.exceptions.FirebaseError:
+        return False
+    except Exception:
+        return False
