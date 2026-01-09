@@ -1,53 +1,38 @@
-import sqlite3
-import hashlib
-import streamlit as st  # import to access secrets
+import requests
+import streamlit as st
 
-# Use Streamlit secrets for DB name
-DB_NAME = st.secrets["database"]["db_name"]
+# Firebase Web API key from Streamlit Secrets
+FIREBASE_API_KEY = st.secrets["firebase"]["firebase_api_key"]
 
-def get_connection():
-    return sqlite3.connect(DB_NAME, check_same_thread=False)
+BASE_URL = "https://identitytoolkit.googleapis.com/v1"
 
-def create_users_table():
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            username TEXT PRIMARY KEY,
-            password TEXT NOT NULL
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
 
 def create_user(username: str, password: str) -> bool:
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
-            (username, hash_password(password))
-        )
-        conn.commit()
-        conn.close()
-        return True
-    except sqlite3.IntegrityError:
-        return False
+    """
+    Sign up user in Firebase.
+    Username is treated as email.
+    """
+    url = f"{BASE_URL}/accounts:signUp?key={FIREBASE_API_KEY}"
+    payload = {
+        "email": username,
+        "password": password,
+        "returnSecureToken": True
+    }
+
+    r = requests.post(url, json=payload)
+    return r.status_code == 200
+
 
 def authenticate_user(username: str, password: str) -> bool:
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT password FROM users WHERE username = ?",
-        (username,)
-    )
-    row = cur.fetchone()
-    conn.close()
+    """
+    Login user via Firebase.
+    """
+    url = f"{BASE_URL}/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+    payload = {
+        "email": username,
+        "password": password,
+        "returnSecureToken": True
+    }
 
-    if not row:
-        return False
-
-    return row[0] == hash_password(password)
+    r = requests.post(url, json=payload)
+    return r.status_code == 200
