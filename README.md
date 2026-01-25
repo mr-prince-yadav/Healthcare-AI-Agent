@@ -149,4 +149,4 @@ streamlit run app.py
 
 ## License
 
-This project is licensed under the MIT License.
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE) This project is open source and intended for educational use.
